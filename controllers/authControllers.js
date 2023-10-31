@@ -11,7 +11,7 @@ class authControllers {
     try {
       const admin = await adminModel.findOne({ email }).select("+password");
 
-      console.log(admin)
+      
       if (admin) {
         const match = await bcrypt.compare(password, admin.password);
         
@@ -22,8 +22,12 @@ class authControllers {
             role: admin.role,
           });
 
+
+          console.log(admin.name)
+          const name = admin.name;
+          const email = admin.email;
           res.cookie("accessToken", token);
-          responseReturn(res, 200, { token, message: "Login success" });
+          responseReturn(res, 200, { token, userInfo : {name , email}, message: "Login success" });
           console.log(req.cookies.accessToken);
         } 
         else {
