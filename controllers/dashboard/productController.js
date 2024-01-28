@@ -107,6 +107,33 @@ try {
   console.log(error);
 }
   }
+
+  product_update = async(req, res) => {
+    const id = req.params.productId;
+    let {name,description,category, discount, price,stock,brand,images} = req.body;
+    name = name.trim()
+    const slug = name.split(' ').join('-');
+
+    try {
+      await productModel.findByIdAndUpdate(id, {
+        name,
+        description,
+        discount,
+        category,
+        price,
+        stock,
+        brand,
+        slug,
+        images,
+      });
+
+      const product = await productModel.findById(id);
+      responseReturn(res, 200, { product, message: 'Product update success' });
+    } catch (error) {
+        responseReturn(res, 500, { error: error.message });
+
+    }
+  }
 }
 
 module.exports = new productController();
