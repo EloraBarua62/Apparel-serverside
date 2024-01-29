@@ -3,20 +3,27 @@ const cloudinary = require("cloudinary").v2;
 const productModel = require("../../models/productModel");
 const { responseReturn } = require("../../utiles/response");
 
-
 class productController {
   product_add = async (req, res) => {
-    const {id} = req;
-    const form = new formidable.IncomingForm({multiples: true});
+    const { id } = req;
+    const form = new formidable.IncomingForm({ multiples: true });
 
     form.parse(req, async (err, field, files) => {
-      let {name, category, description, shopName, brand,stock, price, discount} = field;
-      let {images} = files
-      
+      let {
+        name,
+        category,
+        description,
+        shopName,
+        brand,
+        stock,
+        price,
+        discount,
+      } = field;
+      let { images } = files;
 
-      console.log(category)
-      name = name[0].trim()
-      const slug = name.split(' ').join('-');
+      console.log(category);
+      name = name[0].trim();
+      const slug = name.split(" ").join("-");
 
       cloudinary.config({
         cloud_name: process.env.cloud_name,
@@ -28,10 +35,12 @@ class productController {
       try {
         let allImagesUrl = [];
 
-        for(let i=0 ; i<images.length; i++){
-            const result = await cloudinary.uploader.upload(images[i].filepath, {folder: 'products'})
-        
-            allImagesUrl = [...allImagesUrl, result.url]
+        for (let i = 0; i < images.length; i++) {
+          const result = await cloudinary.uploader.upload(images[i].filepath, {
+            folder: "products",
+          });
+
+          allImagesUrl = [...allImagesUrl, result.url];
         }
 
         const product = await productModel.create({
@@ -47,72 +56,71 @@ class productController {
           discount: parseInt(discount),
           images: allImagesUrl,
         });
-        responseReturn(res, 201, {message: "products added successfully"})
+        responseReturn(res, 201, { message: "products added successfully" });
       } catch (error) {
-                responseReturn(res, 500, {
-                  error: error.message,
-                });
-
+        responseReturn(res, 500, {
+          error: error.message,
+        });
       }
     });
-
   };
 
-  product_get = async(req, res) => {
+  product_get = async (req, res) => {
     const { page, searchValue, parPage } = req.query;
-    const {id} = req;
+    console.log(page, searchValue, parPage);
 
     const skipPage = parseInt(parPage) * (parseInt(page) - 1);
 
-try {
-  if (searchValue) {
-    const products = await productModel
-      .find({
-        $text: { $search: searchValue },
-        sellerId: id
-      })
-      .skip(skipPage)
-      .limit(parPage)
-      .sort({ createdAt: -1 });
-    const totalproducts = await productModel
-      .find({
-        $text: { $search: searchValue },
-        sellerId: id,
-      })
-      .countDocuments();
+    try {
+      if (searchValue) {
+        const products = await productModel
+          .find({
+            $text: { $search: searchValue },
+            sellerId: id,
+          })
+          .skip(skipPage)
+          .limit(parPage)
+          .sort({ createdAt: -1 });
+        const totalproducts = await productModel
+          .find({
+            $text: { $search: searchValue },
+            sellerId: id,
+          })
+          .countDocuments();
 
-    responseReturn(res, 200, { totalproducts, products });
-  } 
-//   else if (searchValue === "" && page && parPage) {
-//     const products = await productModel
-//       .find({})
-//       .skip(skipPage)
-//       .limit(parPage)
-//       .sort({ createdAt: -1 });
-//     const totalProducts = await productModel.find({}).countDocuments();
+        responseReturn(res, 200, { totalproducts, products });
+      }
+        else if (searchValue === "" && page && parPage) {
+          const products = await productModel
+            .find({})
+            .skip(skipPage)
+            .limit(parPage)
+            .sort({ createdAt: -1 });
+          const totalProducts = await productModel.find({}).countDocuments();
 
-//     responseReturn(res, 200, { totalProducts, products });
-//   } 
-  else {
-    const products = await productModel
-      .find({ sellerId: id })
-      .sort({ createdAt: -1 });
-    const totalproducts = await productModel
-      .find({ sellerId: id })
-      .countDocuments();
+          responseReturn(res, 200, { totalProducts, products });
+        }
+      else {
+        const products = await productModel
+          .find({ sellerId: id })
+          .sort({ createdAt: -1 });
+        const totalproducts = await productModel
+          .find({ sellerId: id })
+          .countDocuments();
 
-    responseReturn(res, 200, { totalproducts, products });
-  }
-} catch (error) {
-  console.log(error);
-}
-  }
+        responseReturn(res, 200, { totalproducts, products });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  product_update = async(req, res) => {
+  product_update = async (req, res) => {
     const id = req.params.productId;
-    let {name,description,category, discount, price,stock,brand,images} = req.body;
-    name = name.trim()
-    const slug = name.split(' ').join('-');
+    let { name, description, category, discount, price, stock, brand, images } =
+      req.body;
+    name = name.trim();
+    const slug = name.split(" ").join("-");
 
     try {
       await productModel.findByIdAndUpdate(id, {
@@ -128,12 +136,11 @@ try {
       });
 
       const product = await productModel.findById(id);
-      responseReturn(res, 200, { product, message: 'Product update success' });
+      responseReturn(res, 200, { product, message: "Product update success" });
     } catch (error) {
-        responseReturn(res, 500, { error: error.message });
-
+      responseReturn(res, 500, { error: error.message });
     }
-  }
+  };
 }
 
 module.exports = new productController();

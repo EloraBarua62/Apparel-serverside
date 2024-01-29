@@ -74,16 +74,16 @@ class categoryControllers {
 
         responseReturn(res, 200, { totalCategory, categories });
       } 
-      else if (searchValue === "" && page && parPage) {
-        const categories = await categoryModel
-          .find({})
-          .skip(skipPage)
-          .limit(parPage)
-          .sort({ createdAt: -1 });
-        const totalCategory = await categoryModel.find({}).countDocuments();
+      // else if (searchValue === "" && page && parPage) {
+      //   const categories = await categoryModel
+      //     .find({})
+      //     .skip(skipPage)
+      //     .limit(parPage)
+      //     .sort({ createdAt: -1 });
+      //   const totalCategory = await categoryModel.find({}).countDocuments();
 
-        responseReturn(res, 200, { totalCategory, categories });
-      } 
+      //   responseReturn(res, 200, { totalCategory, categories });
+      // } 
       else {
         
         const categories = await categoryModel.find({}).sort({ createdAt: -1 });

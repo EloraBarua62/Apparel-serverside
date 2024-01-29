@@ -1,3 +1,4 @@
+const formidable = require("formidable");
 const adminModel = require("../models/adminModel");
 const sellerCustomerModel = require("../models/sellerCustomerModel");
 const sellerModel = require("../models/sellerModel");
@@ -5,9 +6,9 @@ const { responseReturn } = require("../utiles/response");
 const { createToken } = require("../utiles/tokenCreate");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
 
 class authControllers {
-
   // admin signup
   admin_signup = async (req, res) => {
     const { name, email, password } = req.body;
@@ -40,8 +41,8 @@ class authControllers {
   // Admin login
   admin_login = async (req, res) => {
     const { email, password } = req.body;
-    console.log(email)
-    console.log(req.body)
+    console.log(email);
+    console.log(req.body);
     try {
       const admin = await adminModel.findOne({ email }).select("+password");
 
@@ -91,16 +92,23 @@ class authControllers {
             role: seller.role,
           });
 
-          console.log(seller.name);
-          const name = seller.name;
-          const email = seller.email;
+          const credential = {
+            name: seller.name,
+            email: seller.email,
+            image: seller.image,
+            role: seller.role,
+            status: seller.status,
+            payment: seller.payment,
+            method: seller.method,
+            shopInfo: seller.shopInfo,
+          };
           res.cookie("accessToken", token);
           responseReturn(res, 200, {
             token,
-            userInfo: { name, email },
+            userInfo: credential,
             message: "Login success",
           });
-          console.log(req.cookies.accessToken);
+          // console.log(req.cookies.accessToken);
         } else {
           responseReturn(res, 404, { error: "Password wrong" });
         }
@@ -155,6 +163,49 @@ class authControllers {
       } else console.log("seller info");
     } catch (error) {}
   };
+  
+  
+  profile_image_upload = async (req, res) => {
+    const form = new formidable.IncomingForm({ multiples: true });
+    const {id} = req;
+    form.parse(req, async (err, _ , files) => {
+    cloudinary.config({
+      cloud_name: process.env.cloud_name,
+      api_key: process.env.api_key,
+      api_secret: process.env.api_secret,
+      secure: true,
+    });
+     
+
+    const {image} = files;
+    console.log(image[0].filepath)
+    try {
+      const result = await cloudinary.uploader.upload(image[0].filepath, {
+        folder: "profile",
+      });
+
+      if(result){
+        await sellerModel.findByIdAndUpdate(id, {
+          image: result.url
+        })
+        const userInfo = await sellerModel.findById(id);
+        responseReturn(res, 201, {
+          message: "image upload successfully",
+          userInfo,
+        });
+      }
+      else{
+        responseReturn(res, 404, {error: 'failed to upload image'})
+      }
+    } catch (error) {
+        responseReturn(res, 500, { message: "Internal server error" });
+    }
+     
+    })
+  };
 }
+
+
+
 
 module.exports = new authControllers();
