@@ -26,6 +26,8 @@ class categoryControllers {
           secure: true,
         });
         try {
+          console.log(image)
+          // console.log(image.file)
           const result = await cloudinary.uploader.upload(image.filepath, {
             folder: "category",
           });

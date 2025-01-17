@@ -6,9 +6,20 @@ const { responseReturn } = require("../utiles/response");
 const { createToken } = require("../utiles/tokenCreate");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+// const { getUser } = require("../models/userModel");
 const cloudinary = require("cloudinary").v2;
 
 class authControllers {
+  // get_user = (req, res) => {
+  //   let data = [];
+  //   try {
+  //     data = getUser();
+  //     console.log(data)
+  //     responseReturn(res, 200, { userInfo: data });
+  //   } catch (error) {
+  //     responseReturn(res, 500, { message: "Internal server error" });
+  //   }
+  // }
   // admin signup
   admin_signup = async (req, res) => {
     const { name, email, password } = req.body;
