@@ -96,7 +96,73 @@ const list_display = async (req, res) => {
 
     if (data.length)
       responseReturn(res, 201, {
-        category_list: final_result,
+        category_details_list: final_result,
+        message: "category data loaded successfully",
+      });
+    else {
+      responseReturn(res, 404, { error: "failed to load category" });
+    }
+  } catch (error) {
+    responseReturn(res, 404, { error: error.message });
+  }
+};
+
+
+const category_list = async (req, res) => {
+  try {
+    const search = `SELECT categorys.category_name, COUNT(products.product_id) as total_products
+            FROM categorys
+            LEFT JOIN products ON categorys.category_id = products.category_id
+            GROUP BY categorys.category_name`;
+    // const search = `SELECT categorys.category_id, category_name, category_image, categorys.created_at, categorys.updated_at, sub_category_id ,sub_category_name, sub_category_image FROM categorys LEFT OUTER JOIN sub_categorys ON (categorys.category_id = sub_categorys.category_id)`;
+    const data = await sqldb.promise().query(search);
+
+    // const length = data[0].length;
+    // let final_result = data[0];
+    // if (length >= 2) {
+    //   let outer_array = [],
+    //     inner_array_name = [final_result[0].sub_category_name],
+    //     inner_array_image = [final_result[0].sub_category_image];
+    //   for (let i = 1; i < length; i++) {
+    //     if (
+    //       final_result[i].category_name === final_result[i - 1].category_name
+    //     ) {
+    //       inner_array_name.push(final_result[i].sub_category_name);
+    //       inner_array_image.push(final_result[i].sub_category_image);
+    //     } else {
+    //       const keep_data = {
+    //         category_id: final_result[i - 1].category_id,
+    //         category_name: final_result[i - 1].category_name,
+    //         category_image: final_result[i - 1].category_image,
+    //         sub_category_name: inner_array_name,
+    //         sub_category_image: inner_array_image,
+    //         created_at: final_result[i - 1].created_at,
+    //         updated_at: final_result[i - 1].updated_at,
+    //       };
+    //       outer_array.push(keep_data);
+    //       inner_array_name = [final_result[i].sub_category_name];
+    //       inner_array_image = [final_result[i].sub_category_image];
+    //     }
+    //   }
+    //   const last_data = {
+    //     category_id: final_result[length - 1].category_id,
+    //     category_name: final_result[length - 1].category_name,
+    //     category_image: final_result[length - 1].category_image,
+    //     sub_category_name: inner_array_name,
+    //     sub_category_image: inner_array_image,
+    //     created_at: final_result[length - 1].created_at,
+    //     updated_at: final_result[length - 1].updated_at,
+    //   };
+    //   outer_array.push(last_data);
+    //   final_result = outer_array;
+    //   outer_array = [];
+    //   inner_array_name = [];
+    //   inner_array_image = [];
+    // }
+    console.log(data[0])
+    if (data[0].length)
+      responseReturn(res, 201, {
+        list: data[0],
         message: "category data loaded successfully",
       });
     else {
@@ -153,4 +219,4 @@ const sub_category_create = async (req, res) => {
   });
 };
 
-module.exports = { create, list_display, sub_category_create };
+module.exports = { create, list_display, category_list, sub_category_create };

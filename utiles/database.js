@@ -85,6 +85,17 @@ sqldb.getConnection((err, connection) => {
       FOREIGN KEY (sub_category_id) REFERENCES sub_categorys (sub_category_id),
       FOREIGN KEY (brand_id) REFERENCES brands (brand_id)
       );`;
+
+      // const brand_table = `CREATE TABLE IF NOT EXISTS brands (
+      //   brand_id INT PRIMARY KEY AUTO_INCREMENT,
+      //   brand_name TEXT NOT NULL,
+      //   brand_status TEXT NOT NULL,
+      //   brand_details TEXT NOT NULL,
+      //   logo_image TEXT NOT NULL, 
+      //   background_image TEXT NOT NULL, 
+      //   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      //   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP    
+      //   );`;
     
     connection.query(shop_table, (err, result) => {
       if (err) throw err;
